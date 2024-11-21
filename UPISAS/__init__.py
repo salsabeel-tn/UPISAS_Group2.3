@@ -37,7 +37,7 @@ def validate_schema(json_instance, json_schema):
     try:
         incomplete_warning_message = "No complete JSON Schema provided for validation"
         if json_schema and "type" in json_schema and "properties" in json_schema:
-            json_instance_keys = sorted(json_instance["CONFIG-SERVER"].keys())
+            json_instance_keys = sorted(json_instance["CONFIG-SERVER"].keys()) 
             json_schema_keys = sorted(json_schema["properties"].keys())
             if json_instance_keys == json_schema_keys:
                 jsonschema.validate(json_instance, json_schema)

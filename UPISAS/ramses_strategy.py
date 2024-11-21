@@ -140,4 +140,4 @@ class RamsesStrategy(ABC):
     @abstractmethod
     def plan(self):
         """Implement the planning logic specific to the strategy."""
-        pass
+        pass 

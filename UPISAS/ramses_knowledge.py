@@ -9,3 +9,4 @@ class RamsesKnowledge:
     monitor_schema: dict
     execute_schema: dict
     adaptation_options_schema: dict
+     

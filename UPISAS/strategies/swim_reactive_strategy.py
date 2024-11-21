@@ -8,7 +8,7 @@ class ReactiveAdaptationManager(RamsesStrategy):
     BROWNOUT_LEVELS = 5
     MAX_SERVICE_RATE = 1 / 0.04452713
 
-    def analyze(self):
+    def analyze(self): 
         return False
         data = self.knowledge.monitored_data
         print(data)

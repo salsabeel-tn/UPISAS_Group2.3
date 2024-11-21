@@ -21,7 +21,7 @@ class RAMSES(Exemplar):
         if auto_start:
             self.start_container()
     
-    def start_run(self):
+    def start_run(self): 
         # to start the api from RAMES interface
         try:
             interface_path =  os.path.join(self.ramses_path, "interface")
