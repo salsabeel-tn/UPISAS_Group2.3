@@ -294,5 +294,6 @@ def get_schema(file):
 
 
 if __name__ == '__main__':
-    print("RAMES APIs available at http://127.0.0.1:500000/")
-    app.run(debug=True, port=500000)
+    print("RAMES APIs available at http://127.0.0.1:50000/")
+    # app.run(debug=True, port=50000)
+    app.run(debug=True, host='127.0.0.1', port=50000)
