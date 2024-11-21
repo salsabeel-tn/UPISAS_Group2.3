@@ -16,7 +16,7 @@ class RAMSES(Exemplar):
     _container_name = ""
     def __init__(self, auto_start=True, container_name = "ramses"
                  ):
-        self.base_endpoint = "http://127.0.0.1:50000"
+        self.base_endpoint = "http://127.0.0.1:41248"
         self.ramses_path = os.path.join(os.path.dirname(__file__), "..", "ramses")
         if auto_start:
             self.start_container()
@@ -26,7 +26,15 @@ class RAMSES(Exemplar):
         try:
             interface_path =  os.path.join(self.ramses_path, "interface")
             subprocess.Popen(
-                ['python', 'api.py'],
+                [
+                'python', '-m', 'flask',
+                '--app', 'api',
+                'run',
+                '--host=0.0.0.0',
+                '--port=41248'
+                ],
+                # ['python', 'api.py'],
+                # ['python', '-m', 'flask', '--app', 'api', 'run', '--host=0.0.0.0', '--port=41248']
                 cwd=interface_path
             )
             logging.info("API started successfully")

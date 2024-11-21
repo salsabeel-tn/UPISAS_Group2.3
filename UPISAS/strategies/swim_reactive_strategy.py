@@ -1,7 +1,7 @@
-from UPISAS.strategy import Strategy
-
+# from UPISAS.strategy import Strategy
+from UPISAS.ramses_strategy import RamsesStrategy
 #This is a port of the ReactiveAdaptationManager originally published alongside SWIM.
-class ReactiveAdaptationManager(Strategy):
+class ReactiveAdaptationManager(RamsesStrategy):
     #These three come from the swim.ini file.
     RT_THRESHOLD = 0.75
     DIMMER_MARGIN = 0.1
@@ -9,6 +9,7 @@ class ReactiveAdaptationManager(Strategy):
     MAX_SERVICE_RATE = 1 / 0.04452713
 
     def analyze(self):
+        return False
         data = self.knowledge.monitored_data
         print(data)
         self.knowledge.analysis_data["server_booting"] = data["servers"] > data["active_servers"]
@@ -33,6 +34,7 @@ class ReactiveAdaptationManager(Strategy):
 
 
     def plan(self):
+        return False
         if((self.knowledge.analysis_data["rt_sufficient"])):
             if(self.knowledge.analysis_data["spare_utilization"] > 1):
                 if(not(self.knowledge.analysis_data["dimmer_at_max"])):
