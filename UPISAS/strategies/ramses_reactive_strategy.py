@@ -124,31 +124,36 @@ class ReactiveAdaptationManager(Strategy):
     #         return False
        
     def plan(self):
-        """
-        Transform analysis data into plan data with request bodies.
-        """
-        print("Starting plan phase.")
         
-        # Extract analysis data
-        analysis_data = self.knowledge.analysis_data
-        
-        # Prepare the plan data
-        plan_data = {
-            "requests": []
-        }
-        
-        # Iterate through analysis_data and create request bodies
-        for service_implementation_name, operation in analysis_data.items():
-            if operation == "addInstance":
-                # Create a request body
-                print(f"Adaptation for service {service_implementation_name} is needed, plan is being created with baseline strategy")
-                request_body = {
-                    "operation": "addInstances",
-                    "serviceImplementationName": service_implementation_name,
-                    "numberOfInstances": 1
-                }
-                # Append to the list of requests
-                plan_data["requests"].append(request_body)
-        # Update knowledge with the plan data
-        self.knowledge.plan_data = plan_data
-        print("Plan phase completed.")
+        try:
+            """
+            Transform analysis data into plan data with request bodies.
+            """
+            print("Starting plan phase.")
+            
+            # Extract analysis data
+            analysis_data = self.knowledge.analysis_data
+            
+            # Prepare the plan data
+            plan_data = {
+                "requests": []
+            }
+            
+            # Iterate through analysis_data and create request bodies
+            for service_implementation_name, operation in analysis_data.items():
+                if operation == "addInstance":
+                    # Create a request body
+                    print(f"Adaptation for service {service_implementation_name} is needed, plan is being created with baseline strategy")
+                    request_body = {
+                        "operation": "addInstances",
+                        "serviceImplementationName": service_implementation_name,
+                        "numberOfInstances": 1
+                    }
+                    # Append to the list of requests
+                    plan_data["requests"].append(request_body)
+            # Update knowledge with the plan data
+            self.knowledge.plan_data = plan_data
+            print("Plan phase completed.")
+        except Exception as e:
+            print("Error during the Plan execution:", str(e))
+            return False
