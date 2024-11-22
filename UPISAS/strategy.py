@@ -55,23 +55,23 @@ class Strategy(ABC):
 
     def execute(self, adaptation=None, endpoint_suffix="execute", with_validation=False):
         # THIS SHOUKD BE IN PLAN
-        request_body = {
-        "requests": [
-                {
-                    "operation": "addInstances",
-                    "serviceImplementationName": "restaurant-service",
-                    "numberOfInstances": 1
-                },
-                {
-                    "operation": "addInstances",
-                    "serviceImplementationName": "restaurant-service",
-                    "numberOfInstances": 2
-                }
-            ]
-        }
+        # request_body = {
+        # "requests": [
+        #         {
+        #             "operation": "addInstances",
+        #             "serviceImplementationName": "restaurant-service",
+        #             "numberOfInstances": 1
+        #         },
+        #         {
+        #             "operation": "addInstances",
+        #             "serviceImplementationName": "restaurant-service",
+        #             "numberOfInstances": 2
+        #         }
+        #     ]
+        # }
 
         
-        adaptation=request_body
+        # adaptation=request_body
         
         # both the if conditions are dummy for future ref
         if not adaptation:
@@ -81,7 +81,8 @@ class Strategy(ABC):
                 self.get_execute_schema()
             validate_schema(adaptation, self.knowledge.execute_schema)
         url = '/'.join([self.exemplar.base_endpoint.rstrip('/'), endpoint_suffix.lstrip('/')])
-            # Iterate over each request in the adaptation
+        
+        # Iterate over each request in the adaptation
         for request_item in adaptation.get("requests", []):
             response = requests.post(url, json=request_item)
             logging.info("[Execute]\tposted adaptation: " + str(request_item))
