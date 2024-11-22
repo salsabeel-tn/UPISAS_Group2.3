@@ -12,37 +12,84 @@ class ReactiveAdaptationManager(Strategy):
         self.qos_satisfaction_rate = 0.9  # Example value
         self.max_boot_time_seconds = 60  # Example value
 
-        # Internal state variables
-        self.current_architecture_map: Dict[str, Service] = {}
-        self.services_forced_adaptation_options_map: Dict[str, List[str]] = {}
-        self.services_proposed_adaptation_options_map: Dict[str, List[str]] = {}
-        self.services_to_skip: Set[str] = set()
-
     def analyze(self):
         try:
+            """
+            Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
+            """
+            print("Starting analysis phase.")
             monitored_data = self.knowledge.monitored_data
-            print(monitored_data)
-            # Get services map from monitored data
-            monitored_data = self.knowledge.monitored_data
-            self.current_architecture_map = self.get_services_map_from_monitored_data(monitored_data)
-            # Perform analysis
-            self.analyse()
-            # Store adaptation options in analysis data
-            self.knowledge.analysis_data['forced_adaptation_options'] = self.services_forced_adaptation_options_map
-            self.knowledge.analysis_data['proposed_adaptation_options'] = self.services_proposed_adaptation_options_map
-            print("Ending Analyse routine")
-            return True
+            analysis_data = {}
+
+            for service_id, service_data in monitored_data.items():
+                print(f"Analysing service {service_id}")
+                analysis_data[service_id] = {
+                    "instances": [],
+                    "forced_adaptations": [],
+                }
+
+                for instance in service_data.get("instances", []):
+                    instance_id = instance.get("instance_id")
+                    status = instance.get("status")
+
+                    if status == "SHUTDOWN":
+                        print(f"Instance {instance_id} is shutdown, ignoring.")
+                        self.services_to_skip.add(service_id)
+                        continue
+
+                    if status == "BOOTING":
+                        print(f"Instance {instance_id} is booting, skipping further analysis.")
+                        self.services_to_skip.add(service_id)
+                        continue
+
+                    if status == "FAILED":
+                        print(f"Instance {instance_id} failed. Forcing shutdown.")
+                        analysis_data[service_id]["forced_adaptations"].append("ShutdownInstanceOption")
+                        self.services_to_skip.add(service_id)
+                        continue
+
+                    if status == "ACTIVE":
+                        qos_values = instance.get("qos", {})
+                        analysis_data[service_id]["instances"].append({
+                            "instance_id": instance_id,
+                            "qos_values": qos_values,
+                        })
+                # Check if there are no active instances
+                if not analysis_data[service_id]["instances"]:
+                    print(f"No active instances for service {service_id}. Adding an instance.")
+                    analysis_data[service_id]["forced_adaptations"].append("AddInstanceOption")
+                    self.services_to_skip.add(service_id)
+
+            self.knowledge.analysis_data = analysis_data
+            print("Analysis phase completed.")
+
         except Exception as e:
             print("Error during the Analyse execution: %s", str(e))
             return False
     
-    def get_services_map_from_monitored_data(self, monitored_data):
-        services_map = {}
-        services_data = monitored_data.get('services', {})
-        for service_id, service_info in services_data.items():
-            service = Service(service_id, service_info)
-            services_map[service_id] = service
-        return services_map
+    def plan(self):
+        """
+        Perform the planning phase of the MAPE-K loop. Use analysis data to generate plan data.
+        """
+        print("Starting plan phase.")
+        analysis_data = self.knowledge.analysis_data
+        plan_data = {}
+
+        for service_id, service_analysis in analysis_data.items():
+            forced_adaptations = service_analysis.get("forced_adaptations", [])
+            if forced_adaptations:
+                print(f"Service {service_id} has forced adaptations: {forced_adaptations}")
+                plan_data[service_id] = forced_adaptations
+                continue
+
+            proposed_options = self.knowledge.adaptation_options.get(service_id, [])
+            if proposed_options:
+                best_option = self.select_best_option(service_id, proposed_options)
+                if best_option:
+                    plan_data[service_id] = [best_option]
+
+        self.knowledge.plan_data = plan_data
+        print("Plan phase completed.")
 
 
 
