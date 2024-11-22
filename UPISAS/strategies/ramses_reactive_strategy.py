@@ -69,27 +69,36 @@ class ReactiveAdaptationManager(Strategy):
     
     def plan(self):
         """
-        Perform the planning phase of the MAPE-K loop. Use analysis data to generate plan data.
+        Transform analysis data into plan data with request bodies.
         """
         print("Starting plan phase.")
+        
+        # Extract analysis data
         analysis_data = self.knowledge.analysis_data
-        plan_data = {}
-
-        for service_id, service_analysis in analysis_data.items():
-            forced_adaptations = service_analysis.get("forced_adaptations", [])
-            if forced_adaptations:
-                print(f"Service {service_id} has forced adaptations: {forced_adaptations}")
-                plan_data[service_id] = forced_adaptations
-                continue
-
-            proposed_options = self.knowledge.adaptation_options.get(service_id, [])
-            if proposed_options:
-                best_option = self.select_best_option(service_id, proposed_options)
-                if best_option:
-                    plan_data[service_id] = [best_option]
-
+        
+        # Prepare the plan data
+        plan_data = {
+            "requests": []
+        }
+        
+        # Iterate through analysis_data and create request bodies
+        for service_implementation_name, operation in analysis_data.items():
+            if operation == "addInstance":
+                # Create a request body
+                print(f"Adaptation for service {service_implementation_name} is needed, plan is being created with baseline strategy")
+                request_body = {
+                    "operation": "addInstances",
+                    "serviceImplementationName": service_implementation_name,
+                    "numberOfInstances": 1
+                }
+                # Append to the list of requests
+                plan_data["requests"].append(request_body)
+        # Update knowledge with the plan data
         self.knowledge.plan_data = plan_data
         print("Plan phase completed.")
+        print(self.knowledge.plan_data)
+
+
 
 
 
