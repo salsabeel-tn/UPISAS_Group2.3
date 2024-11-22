@@ -12,57 +12,57 @@ class ReactiveAdaptationManager(Strategy):
         self.qos_satisfaction_rate = 0.9  # Example value
         self.max_boot_time_seconds = 60  # Example value
 
-def analyze(self):
-    try:
-        """
-        Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
-        Add services with QOS violations to analysis_data:
-        - If availability < 85% or response time > 3, add the currentImplementationId of the service
-          as a key in analysis_data with "addInstance" as its value.
-        """
-        print("Starting analysis phase.")
-        monitored_data = self.knowledge.monitored_data
-        analysis_data = {}
+    def analyze(self):
+        try:
+            """
+            Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
+            Add services with QOS violations to analysis_data:
+            - If availability < 85% or response time > 3, add the currentImplementationId of the service
+            as a key in analysis_data with "addInstance" as its value.
+            """
+            print("Starting analysis phase.")
+            monitored_data = self.knowledge.monitored_data
+            analysis_data = {}
 
-        for service_id, service_data in monitored_data.items():
-            print(f"Analysing service {service_id}")
-            current_implementation_id = service_data.get("currentImplementationId")
+            for service_id, service_data in monitored_data.items():
+                print(f"Analysing service {service_id}")
+                current_implementation_id = service_data.get("currentImplementationId")
 
-            # Assume instances and snapshots are available
-            snapshots = service_data.get("snapshot", [])
-            for snapshot in snapshots:
-                instance_id = snapshot.get("instanceId")
-                status = snapshot.get("status")
-                qos = snapshot.get("qos", {})
+                # Assume instances and snapshots are available
+                snapshots = service_data.get("snapshot", [])
+                for snapshot in snapshots:
+                    instance_id = snapshot.get("instanceId")
+                    status = snapshot.get("status")
+                    qos = snapshot.get("qos", {})
 
-                # Skip if instance is not active
-                if status != "ACTIVE":
-                    print(f"Instance {instance_id} is not active (status: {status}). Skipping.")
-                    continue
+                    # Skip if instance is not active
+                    if status != "ACTIVE":
+                        print(f"Instance {instance_id} is not active (status: {status}). Skipping.")
+                        continue
 
-                # Check for QOS violations
-                availability = qos.get("availability")
-                response_time = qos.get("responseTime")
+                    # Check for QOS violations
+                    availability = qos.get("availability")
+                    response_time = qos.get("responseTime")
 
-                # Convert availability to a number if it exists
-                if isinstance(availability, str) and availability.endswith("%"):
-                    availability = float(availability.strip('%'))
+                    # Convert availability to a number if it exists
+                    if isinstance(availability, str) and availability.endswith("%"):
+                        availability = float(availability.strip('%'))
 
-                if (availability is not None and availability < 85) or (response_time is not None and response_time > 3):
-                    print(f"Instance {instance_id} of service {service_id} has QOS violation: "
-                          f"Availability: {availability}, Response Time: {response_time}.")
-                    
-                    # Add to analysis_data
-                    if current_implementation_id not in analysis_data:
-                        analysis_data[current_implementation_id] = "addInstance"
+                    if (availability is not None and availability < 85) or (response_time is not None and response_time > 3):
+                        print(f"Instance {instance_id} of service {service_id} has QOS violation: "
+                            f"Availability: {availability}, Response Time: {response_time}.")
+                        
+                        # Add to analysis_data
+                        if current_implementation_id not in analysis_data:
+                            analysis_data[current_implementation_id] = "addInstance"
 
-        # Update knowledge with the analysis data
-        self.knowledge.analysis_data = analysis_data
-        print("Analysis phase completed. Analysis Data:", analysis_data)
+            # Update knowledge with the analysis data
+            self.knowledge.analysis_data = analysis_data
+            print("Analysis phase completed. Analysis Data:", analysis_data)
 
-    except Exception as e:
-        print("Error during the Analyse execution:", str(e))
-        return False
+        except Exception as e:
+            print("Error during the Analyse execution:", str(e))
+            return False
 
 
     # def analyze(self):
