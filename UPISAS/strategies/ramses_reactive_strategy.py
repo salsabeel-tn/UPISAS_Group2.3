@@ -59,69 +59,10 @@ class ReactiveAdaptationManager(Strategy):
             # Update knowledge with the analysis data
             self.knowledge.analysis_data = analysis_data
             print("Analysis phase completed. Analysis Data:", analysis_data)
-
+            return True
         except Exception as e:
             print("Error during the Analyse execution:", str(e))
             return False
-
-
-    # def analyze(self):
-    #     try:
-    #         """
-    #         Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
-    #         This should add to analysis_data dict 2 things: name of the service with QOS violation, 'addInstance' strategy
-    #         {"currentImplementationID1": "addInstance",
-    #         "currentImplementationID2": "addInstance"}
-    #         """
-    #         print("Starting analysis phase.")
-    #         monitored_data = self.knowledge.monitored_data
-    #         analysis_data = {}
-
-    #         for service_id, service_data in monitored_data.items():
-    #             print(f"Analysing service {service_id}")
-    #             analysis_data[service_id] = {
-    #                 "instances": [],
-    #                 "forced_adaptations": [],
-    #             }
-
-    #             for instance in service_data.get("instances", []):
-    #                 instance_id = instance.get("instance_id")
-    #                 status = instance.get("status")
-
-    #                 if status == "SHUTDOWN":
-    #                     print(f"Instance {instance_id} is shutdown, ignoring.")
-    #                     # self.services_to_skip.add(service_id)
-    #                     continue
-
-    #                 if status == "BOOTING":
-    #                     print(f"Instance {instance_id} is booting, skipping further analysis.")
-    #                     # self.services_to_skip.add(service_id)
-    #                     continue
-
-    #                 if status == "FAILED":
-    #                     print(f"Instance {instance_id} failed. Forcing shutdown.")
-    #                     analysis_data[service_id]["forced_adaptations"].append("ShutdownInstanceOption")
-    #                     # self.services_to_skip.add(service_id)
-    #                     continue
-
-    #                 if status == "ACTIVE":
-    #                     qos_values = instance.get("qos", {})
-    #                     analysis_data[service_id]["instances"].append({
-    #                         "instance_id": instance_id,
-    #                         "qos_values": qos_values,
-    #                     })
-    #             # Check if there are no active instances
-    #             if not analysis_data[service_id]["instances"]:
-    #                 print(f"No active instances for service {service_id}. Adding an instance.")
-    #                 analysis_data[service_id]["forced_adaptations"].append("AddInstanceOption")
-    #                 # self.services_to_skip.add(service_id)
-
-    #         self.knowledge.analysis_data = analysis_data
-    #         print("Analysis phase completed.")
-
-    #     except Exception as e:
-    #         print("Error during the Analyse execution: %s", str(e))
-    #         return False
        
     def plan(self):
         
@@ -154,6 +95,7 @@ class ReactiveAdaptationManager(Strategy):
             # Update knowledge with the plan data
             self.knowledge.plan_data = plan_data
             print("Plan phase completed.")
+            return True
         except Exception as e:
             print("Error during the Plan execution:", str(e))
             return False
