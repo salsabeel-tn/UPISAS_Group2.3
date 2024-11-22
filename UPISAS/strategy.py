@@ -36,44 +36,33 @@ class Strategy(ABC):
                 self.get_monitor_schema()
             validate_schema(fresh_data, self.knowledge.monitor_schema)
         
-            # Add QoS data to each snapshot
+        # Add QoS data to each snapshot
         for service_data in fresh_data.values():
             snapshots = service_data.get('snapshot', [])
             for snapshot in snapshots:
-                availability = random.randint(80, 90)
-                response_time = random.randint(2, 5)
-                snapshot['qos'] = {
-                    'availability': availability,
-                    'responseTime': response_time
-                }
+                if service_data.get('serviceId') in ["CONFIG-SERVER", "API-GATEWAY-SERVICE"]:
+                    availability = None
+                    response_time = None
+                    snapshot['qos'] = {
+                        'availability': availability,
+                        'responseTime': response_time
+                    }
+                else:
+                    availability = random.randint(80, 90)
+                    response_time = random.randint(2, 5)
+                    snapshot['qos'] = {
+                        'availability': availability,
+                        'responseTime': response_time
+                    }
         
         self.knowledge.monitored_data = fresh_data  # Overwrite with fresh data
         if verbose:
-            # print("[Knowledge]\tdata monitored so far: " + str(self.knowledge.monitored_data))
-            print(str(self.knowledge))
+            print("[Knowledge]\tdata monitored so far: " + str(self.knowledge.monitored_data))
+            # print(str(self.knowledge))
         return True
 
     def execute(self, adaptation=None, endpoint_suffix="execute", with_validation=False):
-        # THIS SHOUKD BE IN PLAN
-        # request_body = {
-        # "requests": [
-        #         {
-        #             "operation": "addInstances",
-        #             "serviceImplementationName": "restaurant-service",
-        #             "numberOfInstances": 1
-        #         },
-        #         {
-        #             "operation": "addInstances",
-        #             "serviceImplementationName": "restaurant-service",
-        #             "numberOfInstances": 2
-        #         }
-        #     ]
-        # }
-
-        
-        # adaptation=request_body
-        
-        # both the if conditions are dummy for future ref
+        # validation is dummy
         if not adaptation:
             adaptation = self.knowledge.plan_data
         if with_validation:
@@ -96,7 +85,6 @@ class Strategy(ABC):
             else:
                 logging.info(f"Execute request succeeded with status code {response.status_code}: {response.text}")
 
-            print("Mango")
             print(response)
 
         return True

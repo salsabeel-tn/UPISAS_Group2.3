@@ -46,7 +46,6 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://sefa-configserver:58888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://sefa-eureka:58082/eureka
       - SPRING_CONFIG_IMPORT=optional:configserver:http://sefa-configserver:58888
-
     restart: always
 
   sefa-ordering-service:
