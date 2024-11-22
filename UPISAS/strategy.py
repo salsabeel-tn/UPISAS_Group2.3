@@ -4,6 +4,7 @@ import pprint
 import requests
 import time
 import json
+import random
 
 from UPISAS.exceptions import EndpointNotReachable
 from UPISAS.knowledge import Knowledge
@@ -34,22 +35,45 @@ class Strategy(ABC):
             if not self.knowledge.monitor_schema:
                 self.get_monitor_schema()
             validate_schema(fresh_data, self.knowledge.monitor_schema)
+        
+            # Add QoS data to each snapshot
+        for service_data in fresh_data.values():
+            snapshots = service_data.get('snapshot', [])
+            for snapshot in snapshots:
+                availability = random.randint(80, 90)
+                response_time = random.randint(2, 5)
+                snapshot['qos'] = {
+                    'availability': availability,
+                    'responseTime': response_time
+                }
+        
         self.knowledge.monitored_data = fresh_data  # Overwrite with fresh data
         if verbose:
-            print("[Knowledge]\tdata monitored so far: " + str(self.knowledge.monitored_data))
-            print("Eureka! Mango!")
+            # print("[Knowledge]\tdata monitored so far: " + str(self.knowledge.monitored_data))
             print(str(self.knowledge))
         return True
 
     def execute(self, adaptation=None, endpoint_suffix="execute", with_validation=False):
+        # dummy request body
         request_body = {
-            "operation": "addInstances",
-            "serviceImplementationName": "restaurant-service",
-            "numberOfInstances": 1
+        "requests": [
+                {
+                    "operation": "addInstances",
+                    "serviceImplementationName": "restaurant-service",
+                    "numberOfInstances": 1
+                },
+                {
+                    "operation": "addInstances",
+                    "serviceImplementationName": "restaurant-service",
+                    "numberOfInstances": 2
+                }
+            ]
         }
+
         
         adaptation=request_body
         
+        # both the if conditions are dummy for future ref
         if not adaptation:
             adaptation = self.knowledge.plan_data
         if with_validation:
@@ -57,16 +81,23 @@ class Strategy(ABC):
                 self.get_execute_schema()
             validate_schema(adaptation, self.knowledge.execute_schema)
         url = '/'.join([self.exemplar.base_endpoint.rstrip('/'), endpoint_suffix.lstrip('/')])
-        response = requests.post(url, json=adaptation)
-        logging.info("[Execute]\tposted adaptation: " + str(adaptation))
-        if response.status_code == 404:
-            logging.error("Cannot execute adaptation on remote system, check that the execute endpoint exists.")
-            raise EndpointNotReachable
-        elif response.status_code >= 400:
-            logging.error(f"Execute request failed with status code {response.status_code}: {response.text}")
-            response.raise_for_status()
-        print("Mango")
-        print(response)
+            # Iterate over each request in the adaptation
+        for request_item in adaptation.get("requests", []):
+            response = requests.post(url, json=request_item)
+            logging.info("[Execute]\tposted adaptation: " + str(request_item))
+
+            if response.status_code == 404:
+                logging.error("Cannot execute adaptation on remote system, check that the execute endpoint exists.")
+                raise EndpointNotReachable
+            elif response.status_code >= 400:
+                logging.error(f"Execute request failed with status code {response.status_code}: {response.text}")
+                response.raise_for_status()
+            else:
+                logging.info(f"Execute request succeeded with status code {response.status_code}: {response.text}")
+
+            print("Mango")
+            print(response)
+
         return True
 
     def get_adaptation_options(self, endpoint_suffix="adaptation_options", with_validation=True):

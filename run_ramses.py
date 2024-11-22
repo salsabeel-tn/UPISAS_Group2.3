@@ -29,8 +29,8 @@ if __name__ == '__main__':
         # Initialize the Strategy directly
         strategy = ReactiveAdaptationManager(exemplar)
         strategy.monitor(verbose=True)
-        # print("will execute")
-        # strategy.execute()
+        time.sleep(10)
+        strategy.execute()
         
     except (Exception, KeyboardInterrupt) as e:
         print(str(e))
