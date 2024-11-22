@@ -12,61 +12,117 @@ class ReactiveAdaptationManager(Strategy):
         self.qos_satisfaction_rate = 0.9  # Example value
         self.max_boot_time_seconds = 60  # Example value
 
-    def analyze(self):
-        try:
-            """
-            Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
-            """
-            print("Starting analysis phase.")
-            monitored_data = self.knowledge.monitored_data
-            analysis_data = {}
+def analyze(self):
+    try:
+        """
+        Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
+        Add services with QOS violations to analysis_data:
+        - If availability < 85% or response time > 3, add the currentImplementationId of the service
+          as a key in analysis_data with "addInstance" as its value.
+        """
+        print("Starting analysis phase.")
+        monitored_data = self.knowledge.monitored_data
+        analysis_data = {}
 
-            for service_id, service_data in monitored_data.items():
-                print(f"Analysing service {service_id}")
-                analysis_data[service_id] = {
-                    "instances": [],
-                    "forced_adaptations": [],
-                }
+        for service_id, service_data in monitored_data.items():
+            print(f"Analysing service {service_id}")
+            current_implementation_id = service_data.get("currentImplementationId")
 
-                for instance in service_data.get("instances", []):
-                    instance_id = instance.get("instance_id")
-                    status = instance.get("status")
+            # Assume instances and snapshots are available
+            snapshots = service_data.get("snapshot", [])
+            for snapshot in snapshots:
+                instance_id = snapshot.get("instanceId")
+                status = snapshot.get("status")
+                qos = snapshot.get("qos", {})
 
-                    if status == "SHUTDOWN":
-                        print(f"Instance {instance_id} is shutdown, ignoring.")
-                        self.services_to_skip.add(service_id)
-                        continue
+                # Skip if instance is not active
+                if status != "ACTIVE":
+                    print(f"Instance {instance_id} is not active (status: {status}). Skipping.")
+                    continue
 
-                    if status == "BOOTING":
-                        print(f"Instance {instance_id} is booting, skipping further analysis.")
-                        self.services_to_skip.add(service_id)
-                        continue
+                # Check for QOS violations
+                availability = qos.get("availability")
+                response_time = qos.get("responseTime")
 
-                    if status == "FAILED":
-                        print(f"Instance {instance_id} failed. Forcing shutdown.")
-                        analysis_data[service_id]["forced_adaptations"].append("ShutdownInstanceOption")
-                        self.services_to_skip.add(service_id)
-                        continue
+                # Convert availability to a number if it exists
+                if isinstance(availability, str) and availability.endswith("%"):
+                    availability = float(availability.strip('%'))
 
-                    if status == "ACTIVE":
-                        qos_values = instance.get("qos", {})
-                        analysis_data[service_id]["instances"].append({
-                            "instance_id": instance_id,
-                            "qos_values": qos_values,
-                        })
-                # Check if there are no active instances
-                if not analysis_data[service_id]["instances"]:
-                    print(f"No active instances for service {service_id}. Adding an instance.")
-                    analysis_data[service_id]["forced_adaptations"].append("AddInstanceOption")
-                    self.services_to_skip.add(service_id)
+                if (availability is not None and availability < 85) or (response_time is not None and response_time > 3):
+                    print(f"Instance {instance_id} of service {service_id} has QOS violation: "
+                          f"Availability: {availability}, Response Time: {response_time}.")
+                    
+                    # Add to analysis_data
+                    if current_implementation_id not in analysis_data:
+                        analysis_data[current_implementation_id] = "addInstance"
 
-            self.knowledge.analysis_data = analysis_data
-            print("Analysis phase completed.")
+        # Update knowledge with the analysis data
+        self.knowledge.analysis_data = analysis_data
+        print("Analysis phase completed. Analysis Data:", analysis_data)
 
-        except Exception as e:
-            print("Error during the Analyse execution: %s", str(e))
-            return False
-    
+    except Exception as e:
+        print("Error during the Analyse execution:", str(e))
+        return False
+
+
+    # def analyze(self):
+    #     try:
+    #         """
+    #         Perform the analysis phase of the MAPE-K loop. Use monitored data to generate analysis data.
+    #         This should add to analysis_data dict 2 things: name of the service with QOS violation, 'addInstance' strategy
+    #         {"currentImplementationID1": "addInstance",
+    #         "currentImplementationID2": "addInstance"}
+    #         """
+    #         print("Starting analysis phase.")
+    #         monitored_data = self.knowledge.monitored_data
+    #         analysis_data = {}
+
+    #         for service_id, service_data in monitored_data.items():
+    #             print(f"Analysing service {service_id}")
+    #             analysis_data[service_id] = {
+    #                 "instances": [],
+    #                 "forced_adaptations": [],
+    #             }
+
+    #             for instance in service_data.get("instances", []):
+    #                 instance_id = instance.get("instance_id")
+    #                 status = instance.get("status")
+
+    #                 if status == "SHUTDOWN":
+    #                     print(f"Instance {instance_id} is shutdown, ignoring.")
+    #                     # self.services_to_skip.add(service_id)
+    #                     continue
+
+    #                 if status == "BOOTING":
+    #                     print(f"Instance {instance_id} is booting, skipping further analysis.")
+    #                     # self.services_to_skip.add(service_id)
+    #                     continue
+
+    #                 if status == "FAILED":
+    #                     print(f"Instance {instance_id} failed. Forcing shutdown.")
+    #                     analysis_data[service_id]["forced_adaptations"].append("ShutdownInstanceOption")
+    #                     # self.services_to_skip.add(service_id)
+    #                     continue
+
+    #                 if status == "ACTIVE":
+    #                     qos_values = instance.get("qos", {})
+    #                     analysis_data[service_id]["instances"].append({
+    #                         "instance_id": instance_id,
+    #                         "qos_values": qos_values,
+    #                     })
+    #             # Check if there are no active instances
+    #             if not analysis_data[service_id]["instances"]:
+    #                 print(f"No active instances for service {service_id}. Adding an instance.")
+    #                 analysis_data[service_id]["forced_adaptations"].append("AddInstanceOption")
+    #                 # self.services_to_skip.add(service_id)
+
+    #         self.knowledge.analysis_data = analysis_data
+    #         print("Analysis phase completed.")
+
+    #     except Exception as e:
+    #         print("Error during the Analyse execution: %s", str(e))
+    #         return False
+       
     def plan(self):
         """
         Transform analysis data into plan data with request bodies.
@@ -96,33 +152,3 @@ class ReactiveAdaptationManager(Strategy):
         # Update knowledge with the plan data
         self.knowledge.plan_data = plan_data
         print("Plan phase completed.")
-        print(self.knowledge.plan_data)
-
-
-
-
-
-    def plan(self):
-        if((self.knowledge.analysis_data["rt_sufficient"])):
-            if(self.knowledge.analysis_data["spare_utilization"] > 1):
-                if(not(self.knowledge.analysis_data["dimmer_at_max"])):
-                    self.knowledge.plan_data["dimmer_factor"] = self.knowledge.analysis_data["current_dimmer"] + self.DIMMER_MARGIN
-                    self.knowledge.plan_data["server_number"] = self.knowledge.analysis_data["current_servers"] #This is due to the schema validation checking for keys.
-                    return True
-                elif(not(self.knowledge.analysis_data["server_booting"]) and self.knowledge.analysis_data["is_server_removable"]):
-                    self.knowledge.plan_data["server_number"] = self.knowledge.analysis_data["current_servers"] - 1
-                    self.knowledge.plan_data["dimmer_factor"] = self.knowledge.analysis_data["current_dimmer"]
-                    return True
-
-        else:
-            self.knowledge.analysis_data["dimmer_at_min"]
-            if(not(self.knowledge.analysis_data["server_booting"]) and (self.knowledge.analysis_data["server_room"])):
-                self.knowledge.plan_data["server_number"] = self.knowledge.analysis_data["current_servers"] + 1
-                self.knowledge.plan_data["dimmer_factor"] = self.knowledge.analysis_data["current_dimmer"]
-                return True
-            elif(not(self.knowledge.analysis_data["dimmer_at_min"])):
-                self.knowledge.plan_data["dimmer_factor"] = self.knowledge.analysis_data["current_dimmer"] - self.DIMMER_MARGIN
-                self.knowledge.plan_data["server_number"] = self.knowledge.analysis_data["current_servers"]
-                return True
-            
-        return False
