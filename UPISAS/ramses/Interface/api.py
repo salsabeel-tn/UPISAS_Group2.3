@@ -239,6 +239,29 @@ def execute_schema():
             mimetype='application/json'
         )
 
+@app.route('/restaurant-service-instance', methods=['GET'])
+def restaurant_service_instance():
+    # Define the URL of the external endpoint
+    url = "http://127.0.0.1:32841/rest/service/RESTAURANT-SERVICE/instance/restaurant-service@sefa-restaurant-service:58085"
+    
+    try:
+        # Make a GET request to the external endpoint
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for HTTP codes 4xx/5xx
+        
+        # Return the external service's response to the client
+        return Response(
+            response=response.text,
+            status=response.status_code,
+            mimetype='application/json'
+        )
+    except requests.exceptions.RequestException as e:
+        # Handle any errors that occur during the request
+        return Response(
+            response=json.dumps({"error": str(e)}),
+            status=500,
+            mimetype='application/json'
+        )
 
 def fetch_system_architecture():
     #probe
@@ -295,6 +318,7 @@ def get_schema(file):
 
 
 if __name__ == '__main__':
-    print("RAMES APIs available at http://127.0.0.1:500000/")
-    app.run(debug=True, port=500000)
+    print("RAMES APIs available at http://127.0.0.1:50000/")
+    # app.run(debug=True, port=50000)
+    app.run(debug=True, host='127.0.0.1', port=50000, use_reloader=False)
     # app.run(debug=True, host='127.0.0.1', port=50000) 
