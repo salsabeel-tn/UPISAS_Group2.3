@@ -20,40 +20,40 @@ import time
 
 
 if __name__ == '__main__':
-    try:
-        exemplar = RAMSES(auto_start=True) #start containers
-        time.sleep(3)
-        exemplar.start_run() #run api.py
-        
-        print('sleeping')
-        # Initialize the Strategy directly
-        strategy = ReactiveAdaptationManager(exemplar)
-        strategy.monitor(verbose=True)
-        # print("will execute")
-        # strategy.execute()
-        
-    except (Exception, KeyboardInterrupt) as e:
-        print(str(e))
-        input("something went wrong")
-        exemplar.stop_container()
-        sys.exit(0)
-  
     # try:
+    exemplar = RAMSES(auto_start=True) #start containers
+    time.sleep(30)
+    exemplar.start_run() #run api.py
+    time.sleep(10)
+    #     print('sleeping')
+    #     # Initialize the Strategy directly
     #     strategy = ReactiveAdaptationManager(exemplar)
-
-    #     strategy.get_monitor_schema()
-    #     strategy.get_adaptation_options_schema()
-    #     strategy.get_execute_schema()
-
-    #     while True:
-    #         input("Try to adapt?")
-    #         strategy.monitor(verbose=True)
-    #         if strategy.analyze():
-    #             if strategy.plan():
-    #                 strategy.execute()
-            
+    #     strategy.monitor(verbose=True)
+    #     # print("will execute")
+    #     # strategy.execute()
+        
     # except (Exception, KeyboardInterrupt) as e:
     #     print(str(e))
     #     input("something went wrong")
     #     exemplar.stop_container()
-    #     sys.exit(0) 
+    #     sys.exit(0)
+  
+    try:
+        strategy = ReactiveAdaptationManager(exemplar)
+
+        strategy.get_monitor_schema()
+        strategy.get_adaptation_options_schema()
+        strategy.get_execute_schema()
+
+        while True:
+            input("Try to adapt?")
+            strategy.monitor(verbose=True)
+            if strategy.analyze():
+                if strategy.plan():
+                    strategy.execute()
+            
+    except (Exception, KeyboardInterrupt) as e:
+        print(str(e))
+        input("something went wrong")
+        exemplar.stop_container()
+        sys.exit(0) 
