@@ -18,13 +18,14 @@ class RAMSES(Exemplar):
                  ):
         self.base_endpoint = "http://127.0.0.1:41248"
         self.ramses_path = os.path.join(os.path.dirname(__file__), "..", "ramses")
+        
         if auto_start:
             self.start_container()
     
     def start_run(self): 
         # to start the api from RAMES interface
         try:
-            interface_path =  os.path.join(self.ramses_path, "interface")
+            interface_path =  os.path.join(self.ramses_path, "Interface")
             subprocess.Popen(
                 [
                 'python', '-m', 'flask',

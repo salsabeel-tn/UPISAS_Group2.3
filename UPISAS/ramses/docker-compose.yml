@@ -37,10 +37,14 @@ services:
     container_name: sefa-restaurant-service
     depends_on:
       - sefa-configserver
+      - sefa-eureka
     ports:
       - "32847:58085"
     networks:
       - ramses-sas-net
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://sefa-configserver:58888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://sefa-eureka:58082/eureka
     restart: always
 
   sefa-ordering-service:
@@ -48,10 +52,14 @@ services:
     container_name: sefa-ordering-service
     depends_on:
       - sefa-configserver
+      - sefa-eureka
     ports:
       - "32833:58086"
     networks:
       - ramses-sas-net
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://sefa-configserver:58888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://sefa-eureka:58082/eureka
     restart: always
 
   sefa-payment-proxy-1-service:

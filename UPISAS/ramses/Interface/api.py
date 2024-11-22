@@ -9,7 +9,7 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, List
 
-from flask import Flask, Response, request
+from flask import Flask, Response, request, jsonify
 
 import requests
 import os
@@ -117,7 +117,6 @@ def adaptation_options_schema():
             mimetype='application/json'
         )
 
-
 @app.route('/execute', methods=['POST'])
 def execute():
     try:
@@ -131,7 +130,8 @@ def execute():
                     status=400,
                     mimetype='application/json'
                 )
-            url = "http://localhost:32779/rest/addInstances"
+            # sefa-instance-manager
+            url = "http://localhost:32839/rest/addInstances"
             headers = {
                 'Content-Type': 'application/json'
             }
@@ -188,7 +188,8 @@ def execute():
                     status=400,
                     mimetype='application/json'
                 )
-            url = "http://localhost:32779/rest/removeInstance"
+            # sefa instance manager
+            url = "http://localhost:32839/rest/removeInstance"
             headers = {
                 'Content-Type': 'application/json'
             }

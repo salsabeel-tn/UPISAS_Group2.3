@@ -1,5 +1,5 @@
-from UPISAS.strategies.swim_reactive_strategy import ReactiveAdaptationManager
-from UPISAS.ramses_strategy import RamsesStrategy
+from UPISAS.strategies.ramses_reactive_strategy import ReactiveAdaptationManager
+# from UPISAS.ramses_strategy import RamsesStrategy
 from UPISAS.exemplar import Exemplar
 from UPISAS.exemplars.ramses import RAMSES
 import signal
@@ -27,10 +27,11 @@ if __name__ == '__main__':
         
         print('sleeping')
         # Initialize the Strategy directly
-        # strategy = RamsesStrategy(exemplar)
         strategy = ReactiveAdaptationManager(exemplar)
-        # Invoke the monitor method
         strategy.monitor(verbose=True)
+        # print("will execute")
+        # strategy.execute()
+        
     except (Exception, KeyboardInterrupt) as e:
         print(str(e))
         input("something went wrong")
