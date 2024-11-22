@@ -27,8 +27,8 @@ if __name__ == '__main__':
     time.sleep(10)
     # print('sleeping')
     # Initialize the Strategy directly
-    strategy = ReactiveAdaptationManager(exemplar)
-    strategy.monitor(verbose=True)
+    # strategy = ReactiveAdaptationManager(exemplar)
+    # strategy.monitor(verbose=True)
     # print("will execute")
     # strategy.execute()
         
@@ -38,22 +38,22 @@ if __name__ == '__main__':
     #     exemplar.stop_container()
     #     sys.exit(0)
   
-    # try:
-    #     strategy = ReactiveAdaptationManager(exemplar)
+    try:
+        strategy = ReactiveAdaptationManager(exemplar)
 
-    #     strategy.get_monitor_schema()
-    #     strategy.get_adaptation_options_schema()
-    #     strategy.get_execute_schema()
+        strategy.get_monitor_schema()
+        strategy.get_adaptation_options_schema()
+        strategy.get_execute_schema()
 
-    #     while True:
-    #         input("Try to adapt?")
-    #         strategy.monitor(verbose=True)
-    #         if strategy.analyze():
-    #             if strategy.plan():
-    #                 strategy.execute()
+        while True:
+            input("Try to adapt?")
+            strategy.monitor(verbose=True)
+            if strategy.analyze():
+                if strategy.plan():
+                    strategy.execute()
             
-    # except (Exception, KeyboardInterrupt) as e:
-    #     print(str(e))
-    #     input("something went wrong")
-    #     exemplar.stop_container()
-    #     sys.exit(0) 
+    except (Exception, KeyboardInterrupt) as e:
+        print(str(e))
+        input("something went wrong")
+        exemplar.stop_container()
+        sys.exit(0) 
