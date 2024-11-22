@@ -54,7 +54,7 @@ class Strategy(ABC):
         return True
 
     def execute(self, adaptation=None, endpoint_suffix="execute", with_validation=False):
-        # dummy request body
+        # THIS SHOUKD BE IN PLAN
         request_body = {
         "requests": [
                 {
@@ -127,7 +127,7 @@ class Strategy(ABC):
     def get_monitor_data(self):
         url = "http://127.0.0.1:41248/monitor"
         
-        print("!!!!!!!!!!!!!!Config Server starting, wait for 2 mins!!!!!!!!!!!!!!")
+        print("!!!!!!!!!!!!!!Config Server container is still starting, wait for 2 mins!!!!!!!!!!!!!!")
         time.sleep(120)  # Initial delay
         max_retries = 10  # Maximum number of retries
         delay_between_retries = 3  # Seconds to wait between retries
