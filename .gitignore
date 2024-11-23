@@ -1,7 +1,7 @@
 .idea
 demo-managed-system/node_modules
 demo-managed-system/package-lock.json
-# ramses/.env
+ramses/.env
 venv
 __pycache__
 UPISAS/experiment_runner_configs/experiments
