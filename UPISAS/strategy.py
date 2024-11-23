@@ -13,10 +13,14 @@ import logging
 
 pp = pprint.PrettyPrinter(indent=4)
 
-
+# Define an abstract base class for monitor and execute
 class Strategy(ABC):
 
     def __init__(self, exemplar):
+        """
+        Initialize the strategy with a given exemplar and knowledge.
+        `exemplar` is expected to contain configuration details like `base_endpoint`.
+        """
         self.exemplar = exemplar  # Contains base_endpoint and other configurations
         self.knowledge = Knowledge(
             monitored_data={}, analysis_data={}, plan_data={},
@@ -28,10 +32,22 @@ class Strategy(ABC):
         logging.info(f"ping result: {ping_res}")
 
     def monitor(self, endpoint_suffix="monitor", with_validation=True, verbose=False):
+        """
+        Fetch and process monitoring data from the `monitor` endpoint.
+
+        Args:
+            endpoint_suffix: Suffix of the endpoint to fetch monitoring data from.
+            with_validation: Whether to validate the data against a schema.
+            verbose: Print detailed information for debugging purposes.
+
+        Returns:
+            True if monitoring data is successfully fetched and processed.
+        """
         fresh_data = self._perform_get_request(endpoint_suffix)
         if verbose:
             print("[Monitor]\tgot fresh_data: " + str(fresh_data))
         if with_validation:
+            # Validate the fetched data against the monitoring schema
             if not self.knowledge.monitor_schema:
                 self.get_monitor_schema()
             validate_schema(fresh_data, self.knowledge.monitor_schema)
@@ -48,6 +64,7 @@ class Strategy(ABC):
                         'responseTime': response_time
                     }
                 else:
+                    # Assign random QoS metrics for other services
                     availability = random.randint(80, 90)
                     response_time = random.randint(2, 5)
                     snapshot['qos'] = {
@@ -55,6 +72,7 @@ class Strategy(ABC):
                         'responseTime': response_time
                     }
         
+        # Update the monitored data in the knowledge base
         self.knowledge.monitored_data = fresh_data  # Overwrite with fresh data
         if verbose:
             print("[Knowledge]\tdata monitored so far: " + str(self.knowledge.monitored_data))
@@ -62,6 +80,17 @@ class Strategy(ABC):
         return True
 
     def execute(self, adaptation=None, endpoint_suffix="execute", with_validation=False):
+        """
+        Execute the given adaptation plan by posting it to the `execute` endpoint.
+
+        Args:
+            adaptation: The plan to execute (default is `self.knowledge.plan_data`).
+            endpoint_suffix: Endpoint to send the adaptation data to.
+            with_validation: Whether to validate the adaptation data before sending it.
+
+        Returns:
+            True if all adaptation requests are successfully executed.
+        """
         # validation is dummy
         if not adaptation:
             adaptation = self.knowledge.plan_data
@@ -71,11 +100,12 @@ class Strategy(ABC):
             validate_schema(adaptation, self.knowledge.execute_schema)
         url = '/'.join([self.exemplar.base_endpoint.rstrip('/'), endpoint_suffix.lstrip('/')])
         
-        # Iterate over each request in the adaptation
+        # Send each request in the adaptation plan to the `execute` endpoint
         for request_item in adaptation.get("requests", []):
             response = requests.post(url, json=request_item)
             logging.info("[Execute]\tposted adaptation: " + str(request_item))
 
+            # Handle potential errors in the response
             if response.status_code == 404:
                 logging.error("Cannot execute adaptation on remote system, check that the execute endpoint exists.")
                 raise EndpointNotReachable
@@ -114,6 +144,12 @@ class Strategy(ABC):
         pp.pprint(self.knowledge.adaptation_options_schema)
         
     def get_monitor_data(self):
+        """
+        Fetch monitoring data with retry logic for robustness.
+
+        Returns:
+            Parsed monitoring data or an empty JSON object if retries fail.
+        """
         url = "http://127.0.0.1:41248/monitor"
         
         print("!!!!!!!!!!!!!!Config Server container is still starting, wait for 2 mins!!!!!!!!!!!!!!")
@@ -152,6 +188,15 @@ class Strategy(ABC):
         return json.dumps({})
 
     def _perform_get_request(self, endpoint_suffix):
+        """
+        Perform a GET request to a given endpoint and handle errors.
+
+        Args:
+            endpoint_suffix: The suffix to append to the base endpoint for the GET request.
+
+        Returns:
+            The JSON response from the GET request.
+        """
         if endpoint_suffix == "monitor":
             data = self.get_monitor_data()
             return data
