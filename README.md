@@ -15,7 +15,7 @@ Take care to add an .env file at the following path ```UPISAS/ramses/.env``` by 
 
 ```
 ARCH= # arm64 or amd64
-GITHUB_REPOSITORY_URL= #link to remote repo for config server without quotation marks {""}
+GITHUB_REPOSITORY_URL= #link to remote repo for config server without quotation marks ("")
 GITHUB_OAUTH= #your personal access token without quotation marks ("")
 
 ```
