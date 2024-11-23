@@ -69,7 +69,7 @@ class RunnerConfig:
         """Prepare the system before starting a run."""
         self.exemplar = RAMSES(auto_start=True)
         self.strategy = ReactiveAdaptationManager(self.exemplar)
-        time.sleep(3)  # Allow the exemplar to initialize
+        time.sleep(30)  # Allow the exemplar to initialize
         output.console_log("Config.before_run() called!")
 
     def start_run(self, context: RunnerContext) -> None:
