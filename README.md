@@ -9,6 +9,17 @@ In a terminal, navigate to the parent folder of the project and issue:
 ```
 pip install -r requirements.txt
 ```
+
+### Adding .env file
+Take care to add an .env file at the following path ```UPISAS/ramses/.env``` by replacing the below empty .env file with your own values
+
+```
+ARCH= # arm64 or amd64
+GITHUB_REPOSITORY_URL= #link to remote repo for config server without quotation marks {""}
+GITHUB_OAUTH= #your personal access token without quotation marks ("")
+
+```
+
 ### Run unit tests
 In a terminal, navigate to the parent folder of the project and issue:
 ```
